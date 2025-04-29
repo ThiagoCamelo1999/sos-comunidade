@@ -36,6 +36,7 @@ Expo Asset (para carregar ícones locais no mapa)
 
 📸 Screenshots
 
+![Icon](https://github.com/user-attachments/assets/0a60533a-2ce2-4230-b169-8bc46a6e805a)
 
 
 
@@ -74,7 +75,7 @@ Leaflet – para exibição de mapas interativos.
 
 🧑‍💻 Autor
 Feito por Thiago da Silva Barbosa Camelo.
-LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142/  
+LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142
 GitHub - https://github.com/ThiagoCamelo1999
 
 📃 Licença
