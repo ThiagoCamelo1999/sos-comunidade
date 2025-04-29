@@ -8,7 +8,7 @@ import { ThemeContext } from '../context/ThemeContext';
 
 
 // Chave de acesso para o serviço de rotas
-const ORS_API_KEY = '5b3ce3597851110001cf62482af63f790a214459b1416e1ebf915798';
+const ORS_API_KEY = "coloque aqui sua chave da api";
 
 // Dados de exemplo com locais de emergência
 const locaisFakes = {
