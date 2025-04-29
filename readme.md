@@ -38,8 +38,14 @@ Expo Asset (para carregar ícones locais no mapa)
 
 ![Icon](https://github.com/user-attachments/assets/0a60533a-2ce2-4230-b169-8bc46a6e805a)
 
+![home](https://github.com/user-attachments/assets/e11ad309-994a-4517-9dd0-caa255bbd895)
+
+![emergencia_rota_definida](https://github.com/user-attachments/assets/ea58c36c-e1d0-4b62-80a1-9a84c7d94e08)
+
+![ajuda](https://github.com/user-attachments/assets/044d7f0b-5191-4eb0-b345-2315cd2fb3a9)
 
 
+Como rodar o projeto
 Acesse a pasta do projeto:
 
 1- cd sos-comunidade
