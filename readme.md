@@ -81,7 +81,8 @@ Leaflet – para exibição de mapas interativos.
 
 🧑‍💻 Autor
 Feito por Thiago da Silva Barbosa Camelo.
-LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142
+
+LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142 
 GitHub - https://github.com/ThiagoCamelo1999
 
 📃 Licença
