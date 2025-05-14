@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "SOS Comunidade",
+    "slug": "sos-comunidade-v2",
+    "owner": "thiago.camelo1999",
+    "version": "5.2.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic", 
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#2d2d30" 
+    },
+    "ios": {
+      "supportsTablet": true,
+      "userInterfaceStyle": "automatic"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2d2d30"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "package": "com.thiago.camelo1999.soscomunidadev2",
+      "userInterfaceStyle": "automatic"
+    },
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#2d2d30"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "backgroundColor": "#2d2d30"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "08b03316-1239-4ca0-890f-b499e5cf99a4"
+      }
+    }
+  }
+}
