@@ -32,7 +32,8 @@ Com ele, o usuário pode localizar rapidamente serviços essenciais como políci
 
 📸 Screenshots
 
-Icon - 
+Icon 
+
 ![Icon](https://github.com/user-attachments/assets/cd92253c-e3b6-48f4-bc2b-b4c4931d96eb)
 
 HomeScreen com tema automatico de acordo com o sistema do dispositivo
