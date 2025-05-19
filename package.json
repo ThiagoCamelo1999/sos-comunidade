@@ -2,6 +2,8 @@
   "name": "sos-comunidade",
   "version": "1.0.0",
   "main": "index.js",
+  "description": "Aplicativo comunitário de emergência com rastreamento em tempo real.",
+  "author": "Thiago da Silva Barbosa Camelo",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

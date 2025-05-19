@@ -1,3 +1,7 @@
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Built with Expo](https://img.shields.io/badge/built%20with-expo-blue)
+
+
 📱 SOS Comunidade
 Aplicativo de ajuda comunitária para emergências.
 Com ele, o usuário pode localizar rapidamente serviços essenciais como polícia, bombeiros, hospitais, UPAs e SAMU, traçar rotas, ligar para os locais e até enviar pedidos de socorro via WhatsApp.
