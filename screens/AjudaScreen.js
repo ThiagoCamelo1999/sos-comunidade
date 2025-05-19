@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
 import { theme } from '../theme'; // Importa o tema centralizado
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 export default function AjudaScreen({ navigation }) {
   const { darkMode } = useContext(ThemeContext);

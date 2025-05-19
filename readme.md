@@ -3,86 +3,82 @@ Aplicativo de ajuda comunitária para emergências.
 Com ele, o usuário pode localizar rapidamente serviços essenciais como polícia, bombeiros, hospitais, UPAs e SAMU, traçar rotas, ligar para os locais e até enviar pedidos de socorro via WhatsApp.
 
 🚀 Tecnologias Utilizadas
-React Native (com Expo)
-
-React Navigation
-
-Expo Location (localização do usuário)
-
-WebView (para exibir mapas via Leaflet)
-
-Leaflet.js (no WebView para mapas interativos)
-
-OpenRouteService API (para traçar rotas)
-
-AsyncStorage (para salvar preferências de tema)
-
-Expo Asset (para carregar ícones locais no mapa)
+- React Native (com Expo)
+- React Navigation
+- Expo Location (localização do usuário)
+- WebView (para exibir mapas via Leaflet)
+- Leaflet.js (no WebView para mapas interativos)
+- OpenRouteService API (para traçar rotas)
+- AsyncStorage (para salvar preferências de tema)
+- Expo Asset (para carregar ícones locais no mapa)
+- Firebase Realtime Database (para rastreamento ao vivo)
+- Expo Haptics (vibração nos alertas)
+- UUID (para gerar links únicos de rastreamento)
+- Expo Status Bar
 
 🎯 Funcionalidades
 🔥 Tela inicial com seleção de tipo de emergência
-
 🗺️ Mapa interativo com localização do usuário e locais de emergência
-
 🚔 Rotas traçadas em tempo real
-
 📞 Ligações rápidas para os serviços
-
-🚑 Botão de pânico para enviar localização via WhatsApp
-
+🚑 Botão de pânico para enviar localização via WhatsApp com link de rastreamento ao vivo
+🔗 Página web de rastreamento em tempo real com atualizações no mapa
+🎛️ Escolha de camadas de visualização no mapa (Claro, Escuro, Satélite, OSM)
 🌗 Suporte a tema claro/escuro
-
-📡 Uso offline parcial (ícones locais, mapa precisa de internet)
+📶 Uso offline parcial (ícones locais, mapa precisa de internet)
+📍 Centralizar localização do usuário
+🕒 Atualização do horário da última posição no mapa
+🎨 Ícones personalizados no mapa
 
 📸 Screenshots
 
-![Icon](https://github.com/user-attachments/assets/0a60533a-2ce2-4230-b169-8bc46a6e805a)
 
-![home](https://github.com/user-attachments/assets/e11ad309-994a-4517-9dd0-caa255bbd895)
+📦 Como rodar o projeto
+1. Acesse a pasta do projeto:
 
-![emergencia_rota_definida](https://github.com/user-attachments/assets/ea58c36c-e1d0-4b62-80a1-9a84c7d94e08)
+cd sos-comunidade
 
-![ajuda](https://github.com/user-attachments/assets/044d7f0b-5191-4eb0-b345-2315cd2fb3a9)
+2. Instale as dependências:
+
+npm install
+
+3. Rode o app:
+
+npm start
+
+Ou use:
+
+expo start
 
 
-Como rodar o projeto
-Acesse a pasta do projeto:
-
-1- cd sos-comunidade
-2- Instale as dependências:
-3- npm install
-4- Rode o app:
-5- npm start ou expo start
-
-Use o aplicativo pelo Expo Go ou rodando no Android Studio.
+4. Use o aplicativo pelo Expo Go ou rodando no Android Studio.
 
 📋 Pré-requisitos
-Node.js instalado
-
-Expo CLI instalado:
+- Node.js instalado
+- Expo CLI instalado:
 
 npm install -g expo-cli
 
-Android Studio ou Expo Go App para testes no celular
-
+- Android Studio ou Expo Go App para testes no celular
 
 🔐 APIs utilizadas
-OpenRouteService – para traçar rotas no mapa.
-
-Leaflet – para exibição de mapas interativos.
-
-(Você precisa de uma chave API gratuita do OpenRouteService para funcionamento completo.)
+- OpenRouteService – para traçar rotas no mapa (requer chave gratuita)
+- Leaflet – para exibição de mapas interativos via WebView
+- Firebase Realtime Database – para rastreamento de localização ao vivo
 
 ✨ Melhorias Futuras
-1- Modo de segurança com alerta sonoro no botão de pânico
-2- Suporte a mapa offline
-3- Notificações locais para emergências
-4- Melhorar suporte offline total
+1. Modo de segurança com alerta sonoro no botão de pânico
+2. Suporte a mapa offline
+3. Notificações locais para emergências
+4. Melhorar suporte offline total
+5. Histórico de rastreamentos
+6. Compartilhamento via SMS e outros canais
+7. Armazenamento de rotas salvas
 
 🧑‍💻 Autor
 Feito por Thiago da Silva Barbosa Camelo.
 
-LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142 / 
+LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142 /  
 GitHub - https://github.com/ThiagoCamelo1999
 
 📃 Licença

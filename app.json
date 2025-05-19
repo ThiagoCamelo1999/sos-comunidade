@@ -3,15 +3,15 @@
     "name": "SOS Comunidade",
     "slug": "sos-comunidade-v2",
     "owner": "thiago.camelo1999",
-    "version": "5.2.1",
+    "version": "9.2.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic", 
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#2d2d30" 
+      "backgroundColor": "#2d2d30"
     },
     "ios": {
       "supportsTablet": true,
@@ -41,6 +41,9 @@
       "eas": {
         "projectId": "08b03316-1239-4ca0-890f-b499e5cf99a4"
       }
-    }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }
