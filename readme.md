@@ -31,6 +31,32 @@ Com ele, o usuário pode localizar rapidamente serviços essenciais como políci
 🎨 Ícones personalizados no mapa
 
 📸 Screenshots
+Icon - 
+![Icon](https://github.com/user-attachments/assets/cd92253c-e3b6-48f4-bc2b-b4c4931d96eb)
+
+HomeScreen com tema automatico de acordo com o sistema do dispositivo
+![home screen - tema automatico](https://github.com/user-attachments/assets/6a4f5386-396e-4b2f-bb61-432a4261339a)
+
+HomeScreen com tema manual
+![tela home - tema manual](https://github.com/user-attachments/assets/795a93be-1754-4f95-a771-e46d4d4bf1ff)
+
+EmergenciaScreen
+![screen emergencia](https://github.com/user-attachments/assets/7ca01b14-c062-4fd8-b78b-ca519ca73fe3)
+
+EmergenciaScreen com rota traçada
+![rota traçada](https://github.com/user-attachments/assets/b660b269-a805-4cc6-8f86-ce8fd9f5ed07)
+
+Abrir app de Rota externo
+![abrir app de rotas](https://github.com/user-attachments/assets/08ebef55-cb64-4cee-8f58-1f6307dd2286)
+
+Botão de panico
+![msg btn-panico](https://github.com/user-attachments/assets/9bbdf6eb-34c0-4bf7-810a-d08dbb4348fe)
+
+Pagina Web Criada para rastrear atravês do link do botão de panico
+![web](https://github.com/user-attachments/assets/3c495e13-cba6-4c35-b960-28f85e42216f)
+
+AjudaScreen
+![ajudaScreen](https://github.com/user-attachments/assets/c5a41e74-3980-4a4b-bb4d-c2c4aa4758eb)
 
 
 📦 Como rodar o projeto
