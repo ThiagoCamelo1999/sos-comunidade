@@ -7,11 +7,14 @@ import * as Location from 'expo-location';
 import { ThemeContext } from '../context/ThemeContext';
 import * as Haptics from 'expo-haptics';
 import { database } from '../context/firebase'; // ou o caminho certo no seu projeto
-import { ref, set } from 'firebase/database';
+import { push, ref, set } from 'firebase/database';
 import uuid from 'react-native-uuid';
+import { startBackgroundTracking, stopBackgroundTracking } from '../context/locationTask'; // caminho certo
+import Constants from 'expo-constants';
 
 // Chave de acesso para o serviço de rotas
-const ORS_API_KEY = '5b3ce3597851110001cf62482af63f790a214459b1416e1ebf915798';
+const ORS_API_KEY = Constants.expoConfig.extra.orsApiKey;
+
 
 // Dados de exemplo com locais de emergência
 const locaisFakes = {
@@ -82,7 +85,7 @@ export default function EmergenciaScreen({ route, navigation }) {
           return;
         }
         const { coords } = await Location.getCurrentPositionAsync({
-           accuracy: Location.Accuracy.Balanced
+          accuracy: Location.Accuracy.Balanced
         });
         setLoc(coords);
       } catch (error) {
@@ -148,12 +151,13 @@ export default function EmergenciaScreen({ route, navigation }) {
     );
   }
 
+  // Função para iniciar o rastreamento em segundo plano
   function iniciarRastreamento() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // vibração leve antes do alerta
 
     Alert.alert(
       '🚨 Rastrear em tempo real',
-      'Deseja compartilhar sua localização ao vivo por 5 minutos?',
+      'Deseja compartilhar sua localização ao vivo por 1 hora?',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -161,55 +165,22 @@ export default function EmergenciaScreen({ route, navigation }) {
           onPress: async () => {
             try {
               const rastreioId = uuid.v4();
-
-              const { status } = await Location.requestForegroundPermissionsAsync();
-              if (status !== 'granted') {
-                Alert.alert('Permissão negada', 'Não é possível rastrear sem acesso à localização.');
-                return;
-              }
-
-              const subscription = await Location.watchPositionAsync(
-                {
-                  accuracy: Location.Accuracy.High,
-                  timeInterval: 10000,
-                  distanceInterval: 10,
-                },
-                async (location) => {
-                  try {
-                    const { latitude, longitude } = location.coords;
-                    const localRef = ref(database, `rastreamento/${rastreioId}`);
-                    await set(localRef, {
-                      latitude,
-                      longitude,
-                      timestamp: Date.now(),
-                    });
-                  } catch (error) {
-                    console.error('❌ Erro ao enviar localização:', error);
-                  }
-                }
-              );
-
-              setWatcher(subscription); // salva para poder encerrar depois
+              await startBackgroundTracking(rastreioId);
 
               const link = `https://sos-comunidade-a98de.web.app/rastreamento.html?id=${rastreioId}`;
               const msg = `🚨 SOS! Me acompanhe em tempo real: ${link}`;
 
-              // Vibração curta antes de abrir link
               await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              Linking.openURL(`https://wa.me/?text=${encodeURIComponent(msg)}`);
 
-              Linking.openURL(`https://wa.me/?text=${encodeURIComponent(msg)}`).catch(() => {
-                Alert.alert('Erro', 'Não foi possível abrir o WhatsApp.');
-              });
-
-              // Encerrar rastreamento após 5 minutos
-              setTimeout(() => {
-                subscription.remove();
-                setWatcher(null);
+              setTimeout(async () => {
+                await stopBackgroundTracking();
                 Alert.alert('Rastreamento encerrado', 'Acompanhar ao vivo finalizado.');
-              }, 5 * 60 * 1000);
+              }, 60 * 60 * 1000); // 1 hora
+
             } catch (err) {
-              console.error('❌ Erro ao iniciar rastreamento:', err);
-              Alert.alert('Erro', 'Algo deu errado ao iniciar o rastreamento.');
+              console.error('Erro ao iniciar rastreamento:', err);
+              Alert.alert('Erro', 'Não foi possível iniciar o rastreamento.');
             }
           },
         },
@@ -218,8 +189,7 @@ export default function EmergenciaScreen({ route, navigation }) {
   }
 
 
-
-
+  // Função para gerar o HTML do mapa
   function gerarHTMLMapa() {
     const center = loc ? `${loc.latitude},${loc.longitude}` : `${pontos[0]?.coords.lat || 0},${pontos[0]?.coords.lon || 0}`;
     // para o vermelho
