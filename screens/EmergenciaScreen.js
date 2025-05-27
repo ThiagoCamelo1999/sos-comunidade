@@ -9,7 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { database } from '../context/firebase'; // ou o caminho certo no seu projeto
 import { push, ref, set } from 'firebase/database';
 import uuid from 'react-native-uuid';
-import { startBackgroundTracking, stopBackgroundTracking } from '../context/locationTask'; // caminho certo
+import { startBackgroundTracking, stopBackgroundTracking } from '../context/locationTask';
 import Constants from 'expo-constants';
 
 // Chave de acesso para o serviço de rotas
@@ -165,6 +165,7 @@ export default function EmergenciaScreen({ route, navigation }) {
           onPress: async () => {
             try {
               const rastreioId = uuid.v4();
+              console.log('🔁 Iniciando rastreamento com ID:', rastreioId);
               await startBackgroundTracking(rastreioId);
 
               const link = `https://sos-comunidade-a98de.web.app/rastreamento.html?id=${rastreioId}`;

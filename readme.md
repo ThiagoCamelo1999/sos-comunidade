@@ -111,12 +111,12 @@ npm install -g expo-cli
 2. Suporte a mapa offline
 3. Notificações locais para emergências
 4. Melhorar suporte offline total
-5. Histórico de rastreamentos
+5. Histórico de rastreamentos anteriores
 6. Compartilhamento via SMS e outros canais
-7. Armazenamento de rotas salvas
+7. Armazenamento e reutilização de rotas
 
 🧑‍💻 Autor
-Feito por Thiago da Silva Barbosa Camelo.
+Thiago da Silva Barbosa Camelo.
 
 LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142 /  
 GitHub - https://github.com/ThiagoCamelo1999

@@ -6,7 +6,7 @@ export default {
     name: "SOS Comunidade",
     slug: "sos-comunidade-v2",
     owner: "thiago.camelo1999",
-    version: "9.2.4",
+    version: "12.5.5",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
@@ -28,7 +28,8 @@ export default {
       permissions: [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE"
       ],
       package: "com.thiago.camelo1999.soscomunidadev2",
       userInterfaceStyle: "automatic"

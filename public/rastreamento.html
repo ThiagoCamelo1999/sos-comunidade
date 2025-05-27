@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8" />
   <title>Rastreamento em Tempo Real</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
       background: #f5f5f5;
     }
-
     #map {
       height: 100%;
     }
-
     #info {
       position: absolute;
       top: 10px;
@@ -35,7 +31,6 @@
       text-align: center;
       min-width: 220px;
     }
-
     #centerBtn {
       position: absolute;
       bottom: 20px;
@@ -51,17 +46,14 @@
       z-index: 1000;
       transition: background 0.2s ease;
     }
-
     #centerBtn:hover {
       background: #0056b3;
     }
-
     @media (max-width: 600px) {
       #info {
         font-size: 13px;
         padding: 8px 12px;
       }
-
       #centerBtn {
         padding: 10px;
         font-size: 18px;
@@ -69,7 +61,6 @@
     }
   </style>
 </head>
-
 <body>
   <div id="info">⌛ Aguardando localização...</div>
   <div id="map"></div>
@@ -77,131 +68,144 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const id = urlParams.get("id");
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    if (!id) alert("ID de rastreamento não informado.");
 
-  if (!id) {
-    alert("ID de rastreamento não informado.");
-  }
+    // 🗺️ Camadas do mapa
+    const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    });
+    const cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    });
+    const cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    });
+    const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles © Esri'
+    });
 
-  const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors",
-  });
+    const map = L.map("map", {
+      center: [-8.05, -34.9],
+      zoom: 13,
+      layers: [osm]
+    });
 
-  const cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://carto.com/">Carto</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
-  });
+    const baseMaps = {
+      "🌍 OpenStreetMap": osm,
+      "🧊 Claro (Carto Light)": cartoLight,
+      "🌙 Escuro (Carto Dark)": cartoDark,
+      "🛰️ Satélite (Esri)": satellite
+    };
+    L.control.layers(baseMaps).addTo(map);
 
-  const cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://carto.com/">Carto</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
-  });
+    function atualizarFiltro() {
+      const tilePane = document.querySelector('.leaflet-tile-pane');
+      if (!tilePane) return;
+      const isDark = Object.values(map._layers).some(layer => layer._url && layer._url.includes('dark_all'));
+      tilePane.style.filter = isDark ? 'brightness(4) contrast(1)' : 'none';
+    }
+    map.on('baselayerchange', atualizarFiltro);
+    atualizarFiltro();
 
-  const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-    attribution: 'Tiles © Esri'
-  });
+    const userIcon = L.icon({
+      iconUrl: "/icon/location.gif",
+      iconSize: [40, 40],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+    });
 
-  const map = L.map("map", {
-    center: [-8.05, -34.9],
-    zoom: 13,
-    layers: [osm] // camada inicial
-  });
+    const marker = L.marker([0, 0], { icon: userIcon }).addTo(map);
+    const infoBox = document.getElementById("info");
+    const centerBtn = document.getElementById("centerBtn");
 
-  const baseMaps = {
-    "🌍 OpenStreetMap": osm,
-    "🧊 Claro (Carto Light)": cartoLight,
-    "🌙 Escuro (Carto Dark)": cartoDark,
-    "🛰️ Satélite (Esri)": satellite
-  };
+    const dbUrl = `https://sos-comunidade-a98de-default-rtdb.firebaseio.com/rastreamento/${id}.json`;
 
-  L.control.layers(baseMaps).addTo(map);
+    let lastLatLng = null;
+    let ultimaHora = null;
+    const pontos = [];
+    let linha = null;
+    let marcadorInicio = null;
+    let marcadorFim = null;
 
-  // 🌓 Aplica filtro quando a camada escura estiver ativa
-  function atualizarFiltro() {
-    const tilePane = document.querySelector('.leaflet-tile-pane');
-    if (!tilePane) return;
+    async function atualizar() {
+      try {
+        const res = await fetch(dbUrl);
+        const data = await res.json();
+        if (!data || typeof data !== 'object') {
+          infoBox.innerText = "🔄 Aguardando dados...";
+          return;
+        }
 
-    const isDark = Object.values(map._layers).some(layer =>
-      layer._url && layer._url.includes('dark_all')
-    );
+        const meta = data.meta || {};
+        const entradas = Object.entries(data).filter(([k]) => k !== 'meta');
+        if (entradas.length === 0) {
+          infoBox.innerText = "🔄 Nenhum ponto encontrado.";
+          return;
+        }
 
-    tilePane.style.filter = isDark ? 'brightness(4) contrast(1)' : 'none';
-  }
+        entradas.sort((a, b) => a[1].timestamp - b[1].timestamp);
+        const ultima = entradas[entradas.length - 1][1];
+        const latlng = [ultima.latitude, ultima.longitude];
 
-  map.on('baselayerchange', atualizarFiltro);
-  atualizarFiltro(); // executa ao iniciar
+        marker.setLatLng(latlng).bindPopup("📍 Localização atual").openPopup();
 
-  const userIcon = L.icon({
-    iconUrl: "/icon/location.gif", // ícone externo para garantir carregamento
-    iconSize: [40, 40],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-  });
+        if (!lastLatLng) map.setView(latlng, 16);
+        else map.flyTo(latlng, 16, { animate: true, duration: 1.2 });
 
-  const marker = L.marker([0, 0], { icon: userIcon }).addTo(map);
-  const infoBox = document.getElementById("info");
-  const centerBtn = document.getElementById("centerBtn");
+        lastLatLng = latlng;
 
-  const dbUrl = `https://sos-comunidade-a98de-default-rtdb.firebaseio.com/rastreamento/${id}.json`;
+        if (ultima.timestamp && ultima.timestamp !== ultimaHora) {
+          ultimaHora = ultima.timestamp;
+          const hora = new Date(ultima.timestamp).toLocaleTimeString();
+          infoBox.innerText = `✅ Última atualização: ${hora}`;
+        }
 
-  let lastLatLng = null;
-
-let ultimaHora = null;
-
-async function atualizar() {
-  try {
-    const res = await fetch(dbUrl);
-    const data = await res.json();
-
-    if (data && data.latitude && data.longitude) {
-      const lat = data.latitude;
-      const lon = data.longitude;
-      const latlng = [lat, lon];
-
-      if (!lastLatLng) {
-        map.setView(latlng, 16);
-      } else {
-        map.flyTo(latlng, 16, {
-          animate: true,
-          duration: 1.2,
+        pontos.length = 0;
+        entradas.forEach(([, pos]) => {
+          if (pos.latitude && pos.longitude) {
+            pontos.push([pos.latitude, pos.longitude]);
+          }
         });
+
+        if (linha) map.removeLayer(linha);
+        linha = L.polyline(pontos, { color: '#007bff', weight: 4 }).addTo(map);
+
+        // ✅ marcador de início
+        if (meta.localInicio && !marcadorInicio) {
+          const inicioHora = meta.iniciadoEm ? new Date(meta.iniciadoEm).toLocaleTimeString() : '';
+          marcadorInicio = L.marker([meta.localInicio.latitude, meta.localInicio.longitude]).addTo(map)
+            .bindPopup(`🟢 Iniciado às ${inicioHora}`).openPopup();
+        }
+
+        // ✅ marcador de fim
+        if (meta.finalizadoEm && !marcadorFim) {
+          const fimHora = new Date(meta.finalizadoEm).toLocaleTimeString();
+          marcadorFim = L.marker(latlng).addTo(map)
+            .bindPopup(`🔴 Finalizado às ${fimHora}`).openPopup();
+        }
+
+        console.log(`🔵 Trajeto com ${pontos.length} pontos atualizado.`);
+      } catch (err) {
+        console.error("Erro ao buscar localização:", err);
+        infoBox.innerText = "⚠️ Erro ao buscar localização.";
       }
+    }
 
-      marker.setLatLng(latlng).bindPopup("📍 Localização atual").openPopup();
-      lastLatLng = latlng;
-
-      // Atualiza o horário apenas se timestamp for diferente
-      if (data.timestamp && data.timestamp !== ultimaHora) {
-        ultimaHora = data.timestamp;
-        const hora = new Date(data.timestamp).toLocaleTimeString();
-        infoBox.innerText = `✅ Última atualização: ${hora}`;
+    centerBtn.onclick = () => {
+      if (lastLatLng) {
+        map.flyTo(lastLatLng, 16, { animate: true, duration: 1.2 });
       }
-    } else {
-      infoBox.innerText = "🔄 Aguardando nova localização...";
-    }
-  } catch (err) {
-    console.error("Erro ao buscar localização:", err);
-    infoBox.innerText = "⚠️ Erro ao buscar localização.";
-  }
-}
+    };
 
-
-  centerBtn.onclick = () => {
-    if (lastLatLng) {
-      map.flyTo(lastLatLng, 16, {
-        animate: true,
-        duration: 1.2,
-      });
-    }
-  };
-
-  setInterval(atualizar, 5000); // Atualiza a cada 5 segundos
-  atualizar();
-</script>
+    setInterval(atualizar, 5000);
+    atualizar();
+  </script>
 </body>
-
 </html>

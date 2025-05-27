@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
 import { ThemeProvider, ThemeContext } from './context/ThemeContext';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-
+import './context/locationTask';
 import HomeScreen from './screens/HomeScreen';
 import EmergenciaScreen from './screens/EmergenciaScreen';
 import AjudaScreen from './screens/AjudaScreen';
