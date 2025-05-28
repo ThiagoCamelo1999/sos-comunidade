@@ -1,12 +1,12 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Built with Expo](https://img.shields.io/badge/built%20with-expo-blue)
 
-
 📱 SOS Comunidade
-Aplicativo de ajuda comunitária para emergências.
+Aplicativo de suporte comunitário em emergências, com rastreamento em tempo real e localização de serviços essenciais.
 Com ele, o usuário pode localizar rapidamente serviços essenciais como polícia, bombeiros, hospitais, UPAs e SAMU, traçar rotas, ligar para os locais e até enviar pedidos de socorro via WhatsApp.
 
-🚀 Tecnologias Utilizadas
+### 🚀 Tecnologias Utilizadas
+
 - React Native (com Expo)
 - React Navigation
 - Expo Location (localização do usuário)
@@ -20,23 +20,24 @@ Com ele, o usuário pode localizar rapidamente serviços essenciais como políci
 - UUID (para gerar links únicos de rastreamento)
 - Expo Status Bar
 
-🎯 Funcionalidades
-🔥 Tela inicial com seleção de tipo de emergência
-🗺️ Mapa interativo com localização do usuário e locais de emergência
-🚔 Rotas traçadas em tempo real
-📞 Ligações rápidas para os serviços
-🚑 Botão de pânico para enviar localização via WhatsApp com link de rastreamento ao vivo
-🔗 Página web de rastreamento em tempo real com atualizações no mapa
-🎛️ Escolha de camadas de visualização no mapa (Claro, Escuro, Satélite, OSM)
-🌗 Suporte a tema claro/escuro
-📶 Uso offline parcial (ícones locais, mapa precisa de internet)
-📍 Centralizar localização do usuário
-🕒 Atualização do horário da última posição no mapa
-🎨 Ícones personalizados no mapa
+### 🎯 Funcionalidades
 
-📸 Screenshots
+- 🔥 Tela inicial com seleção de tipo de emergência
+- 🗺️ Mapa interativo com localização do usuário e locais de emergência
+- 🚔 Traçar rotas em tempo real
+- 📞 Ligações rápidas para os serviços
+- 🚑 Botão de pânico com envio de localização via WhatsApp
+- 🔗 Página web para rastreamento ao vivo
+- 🗺️ Escolha de camadas (Claro, Escuro, Satélite, OSM)
+- 🌗 Tema claro/escuro automático e manual
+- 📶 Uso parcial offline (ícones e interface local, mapas online)
+- 📍 Centralização da localização
+- 🕒 Atualização automática da última posição
+- 🎨 Ícones personalizados no mapa
 
-Icon 
+### 📸 Screenshots
+
+Icone
 
 ![Icon](https://github.com/user-attachments/assets/cd92253c-e3b6-48f4-bc2b-b4c4931d96eb)
 
@@ -72,8 +73,8 @@ AjudaScreen
 
 ![ajudaScreen](https://github.com/user-attachments/assets/c5a41e74-3980-4a4b-bb4d-c2c4aa4758eb)
 
+### 📦 Como rodar o projeto
 
-📦 Como rodar o projeto
 1. Acesse a pasta do projeto:
 
 cd sos-comunidade
@@ -90,10 +91,10 @@ Ou use:
 
 expo start
 
-
 4. Use o aplicativo pelo Expo Go ou rodando no Android Studio.
 
 📋 Pré-requisitos
+
 - Node.js instalado
 - Expo CLI instalado:
 
@@ -101,12 +102,14 @@ npm install -g expo-cli
 
 - Android Studio ou Expo Go App para testes no celular
 
-🔐 APIs utilizadas
+### 🔐 APIs utilizadas
+
 - OpenRouteService – para traçar rotas no mapa (requer chave gratuita)
 - Leaflet – para exibição de mapas interativos via WebView
 - Firebase Realtime Database – para rastreamento de localização ao vivo
 
-✨ Melhorias Futuras
+### ✨ Melhorias Futuras
+
 1. Modo de segurança com alerta sonoro no botão de pânico
 2. Suporte a mapa offline
 3. Notificações locais para emergências
@@ -115,14 +118,14 @@ npm install -g expo-cli
 6. Compartilhamento via SMS e outros canais
 7. Armazenamento e reutilização de rotas
 
-🧑‍💻 Autor
+### 🧑‍💻 Autor
 Thiago da Silva Barbosa Camelo.
 
 LinkedIn - https://www.linkedin.com/in/thiago-da-silva-486a25142 /  
 GitHub - https://github.com/ThiagoCamelo1999
 
-📃 Licença
+### 📃 Licença
 Este projeto está licenciado sob a licença MIT.
 Veja o arquivo LICENSE para mais detalhes.
 
-🚨 SOS Comunidade – Seu apoio rápido em momentos de emergência!
+### 🚨 SOS Comunidade – Seu apoio rápido em momentos de emergência!

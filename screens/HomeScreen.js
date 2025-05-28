@@ -171,60 +171,73 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
+// Estilos para a tela HomeScreen usando StyleSheet do React Native
 const styles = StyleSheet.create({
+  // Container principal da tela, centraliza os itens
   container: {
     alignItems: 'center',
   },
+  // Container para o controle de tema (botão e switch)
   themeControlContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-end',
-    marginBottom: 24,
+    flexDirection: 'row', // Itens em linha
+    alignItems: 'center', // Centraliza verticalmente
+    alignSelf: 'flex-end', // Alinha à direita
+    marginBottom: 24, // Espaço inferior
   },
+  // Estilo do botão de alternância de modo de tema (claro/escuro/auto)
   themeModeButton: {
-    marginRight: 10,
+    marginRight: 10, // Espaço à direita do botão
   },
+  // Texto do botão de modo de tema
   themeModeText: {
-    fontSize: 16,
+    fontSize: 16, // Tamanho da fonte
   },
+  // Cabeçalho da tela (título e subtítulo)
   header: {
-    alignItems: 'center',
-    marginBottom: 32,
-    width: '100%',
+    alignItems: 'center', // Centraliza horizontalmente
+    marginBottom: 32, // Espaço inferior
+    width: '100%', // Ocupa toda a largura
   },
+  // Estilo do título principal
   title: {
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: 'bold', // Negrito
+    textAlign: 'center', // Centraliza texto
   },
+  // Estilo do subtítulo
   subtitle: {
-    textAlign: 'center',
+    textAlign: 'center', // Centraliza texto
   },
+  // Container exibido durante o carregamento (ActivityIndicator)
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 200,
+    flex: 1, // Ocupa espaço disponível
+    justifyContent: 'center', // Centraliza verticalmente
+    alignItems: 'center', // Centraliza horizontalmente
+    minHeight: 200, // Altura mínima
   },
+  // Grid dos botões de emergência
   buttonGrid: {
-    width: '100%',
-    alignItems: 'center',
+    width: '100%', // Ocupa toda a largura
+    alignItems: 'center', // Centraliza botões
   },
+  // Estilo dos botões de emergência
   emergencyButton: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    elevation: 2,
+    width: '100%', // Ocupa toda a largura
+    paddingVertical: 14, // Espaçamento vertical interno
+    borderRadius: 8, // Bordas arredondadas
+    alignItems: 'center', // Centraliza texto
+    elevation: 2, // Sombra (Android)
   },
+  // Estilo do botão de ajuda e de encerrar rastreamento
   helpButton: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    elevation: 2,
+    width: '100%', // Ocupa toda a largura
+    paddingVertical: 14, // Espaçamento vertical interno
+    borderRadius: 8, // Bordas arredondadas
+    alignItems: 'center', // Centraliza texto
+    elevation: 2, // Sombra (Android)
   },
+  // Estilo do texto dos botões
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: '#fff', // Cor branca
+    fontWeight: '600', // Seminegrito
   },
 });

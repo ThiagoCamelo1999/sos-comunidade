@@ -40,3 +40,6 @@ yarn-error.*
 # chaves de API
 # .env
 .env
+
+# eas 
+eas.json

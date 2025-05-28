@@ -4,8 +4,10 @@
   <meta charset="UTF-8" />
   <title>Rastreamento em Tempo Real</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Importa o CSS do Leaflet para o mapa -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
+    /* Estilos básicos da página e do mapa */
     html, body {
       margin: 0;
       padding: 0;
@@ -16,6 +18,7 @@
     #map {
       height: 100%;
     }
+    /* Caixa de informações no topo */
     #info {
       position: absolute;
       top: 10px;
@@ -31,6 +34,7 @@
       text-align: center;
       min-width: 220px;
     }
+    /* Botão para centralizar o mapa */
     #centerBtn {
       position: absolute;
       bottom: 20px;
@@ -49,6 +53,7 @@
     #centerBtn:hover {
       background: #0056b3;
     }
+    /* Responsividade para telas pequenas */
     @media (max-width: 600px) {
       #info {
         font-size: 13px;
@@ -62,150 +67,210 @@
   </style>
 </head>
 <body>
+  <!-- Caixa de informações de status -->
   <div id="info">⌛ Aguardando localização...</div>
+  <!-- Área onde o mapa será renderizado -->
   <div id="map"></div>
+  <!-- Botão para centralizar o mapa na última posição -->
   <button id="centerBtn" title="Centralizar mapa">📍</button>
 
+  <!-- Importa o JS do Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
-    if (!id) alert("ID de rastreamento não informado.");
+  <!-- ... (parte superior do seu HTML permanece a mesma) -->
 
-    // 🗺️ Camadas do mapa
-    const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
-    });
-    const cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://carto.com/">Carto</a>',
-      subdomains: 'abcd',
-      maxZoom: 19
-    });
-    const cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://carto.com/">Carto</a>',
-      subdomains: 'abcd',
-      maxZoom: 19
-    });
-    const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      attribution: 'Tiles © Esri'
-    });
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Obtém o parâmetro "id" da URL para identificar o rastreamento
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+  if (!id) alert("ID de rastreamento não informado.");
 
-    const map = L.map("map", {
-      center: [-8.05, -34.9],
-      zoom: 13,
-      layers: [osm]
-    });
+  // 🗺️ Define as camadas de mapa base (OpenStreetMap, Carto Light/Dark, Satélite)
+  const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors",
+  });
+  const cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+    subdomains: 'abcd', maxZoom: 19
+  });
+  const cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+    subdomains: 'abcd', maxZoom: 19
+  });
+  const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution: 'Tiles © Esri'
+  });
 
-    const baseMaps = {
-      "🌍 OpenStreetMap": osm,
-      "🧊 Claro (Carto Light)": cartoLight,
-      "🌙 Escuro (Carto Dark)": cartoDark,
-      "🛰️ Satélite (Esri)": satellite
-    };
-    L.control.layers(baseMaps).addTo(map);
+  // Inicializa o mapa com centro e zoom padrão, usando OSM como camada inicial
+  const map = L.map("map", {
+    center: [-8.05, -34.9],
+    zoom: 13,
+    layers: [osm]
+  });
 
-    function atualizarFiltro() {
-      const tilePane = document.querySelector('.leaflet-tile-pane');
-      if (!tilePane) return;
-      const isDark = Object.values(map._layers).some(layer => layer._url && layer._url.includes('dark_all'));
-      tilePane.style.filter = isDark ? 'brightness(4) contrast(1)' : 'none';
-    }
-    map.on('baselayerchange', atualizarFiltro);
-    atualizarFiltro();
+  // Define as opções de camadas base para o controle de camadas
+  const baseMaps = {
+    "🌍 OpenStreetMap": osm,
+    "🧊 Claro (Carto Light)": cartoLight,
+    "🌙 Escuro (Carto Dark)": cartoDark,
+    "🛰️ Satélite (Esri)": satellite
+  };
+  L.control.layers(baseMaps).addTo(map);
 
-    const userIcon = L.icon({
-      iconUrl: "/icon/location.gif",
-      iconSize: [40, 40],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
-    });
+  // Função para aplicar filtro visual quando o tema escuro está ativo
+  function atualizarFiltro() {
+    const tilePane = document.querySelector('.leaflet-tile-pane');
+    if (!tilePane) return;
+    const isDark = Object.values(map._layers).some(layer => layer._url && layer._url.includes('dark_all'));
+    tilePane.style.filter = isDark ? 'brightness(4) contrast(1)' : 'none';
+  }
+  // Atualiza o filtro ao trocar camada base
+  map.on('baselayerchange', atualizarFiltro);
+  atualizarFiltro();
 
-    const marker = L.marker([0, 0], { icon: userIcon }).addTo(map);
-    const infoBox = document.getElementById("info");
-    const centerBtn = document.getElementById("centerBtn");
+  // 🧭 Define ícones personalizados para usuário, início e fim
+  const userIcon = L.icon({ iconUrl: "/icon/location.gif", iconSize: [40, 40], iconAnchor: [16, 32], popupAnchor: [0, -32] });
 
-    const dbUrl = `https://sos-comunidade-a98de-default-rtdb.firebaseio.com/rastreamento/${id}.json`;
+  // Ícones para tema claro
+  const startIconLight = L.icon({ iconUrl: "/icon/start.gif", iconSize: [40, 40], iconAnchor: [16, 32], popupAnchor: [0, -32] });
+  const endIconLight = L.icon({ iconUrl: "/icon/end.gif", iconSize: [40, 40], iconAnchor: [16, 32], popupAnchor: [0, -32] });
 
-    let lastLatLng = null;
-    let ultimaHora = null;
-    const pontos = [];
-    let linha = null;
-    let marcadorInicio = null;
-    let marcadorFim = null;
+  // Ícones invertidos para tema escuro/satélite
+  const startIconDark = L.icon({ iconUrl: "/icon/start-dark.gif", iconSize: [40, 40], iconAnchor: [16, 32], popupAnchor: [0, -32] });
+  const endIconDark = L.icon({ iconUrl: "/icon/end-dark.gif", iconSize: [40, 40], iconAnchor: [16, 32], popupAnchor: [0, -32] });
 
-    async function atualizar() {
-      try {
-        const res = await fetch(dbUrl);
-        const data = await res.json();
-        if (!data || typeof data !== 'object') {
-          infoBox.innerText = "🔄 Aguardando dados...";
-          return;
-        }
+  // Começa com os ícones claros por padrão
+  let currentStartIcon = startIconLight;
+  let currentEndIcon = endIconLight;
 
-        const meta = data.meta || {};
-        const entradas = Object.entries(data).filter(([k]) => k !== 'meta');
-        if (entradas.length === 0) {
-          infoBox.innerText = "🔄 Nenhum ponto encontrado.";
-          return;
-        }
+  // Atualiza os ícones de início/fim conforme o tema do mapa
+  map.on('baselayerchange', function(e) {
+    const isDark = e.name.includes('Escuro') || e.name.includes('Satélite');
+    currentStartIcon = isDark ? startIconDark : startIconLight;
+    currentEndIcon = isDark ? endIconDark : endIconLight;
+    if (marcadorInicio) marcadorInicio.setIcon(currentStartIcon);
+    if (marcadorFim) marcadorFim.setIcon(currentEndIcon);
+  });
 
-        entradas.sort((a, b) => a[1].timestamp - b[1].timestamp);
-        const ultima = entradas[entradas.length - 1][1];
-        const latlng = [ultima.latitude, ultima.longitude];
+  // Cria o marcador do usuário (posição atual)
+  const marker = L.marker([0, 0], { icon: userIcon });
+  // Referências para caixa de informações e botão de centralizar
+  const infoBox = document.getElementById("info");
+  const centerBtn = document.getElementById("centerBtn");
 
-        marker.setLatLng(latlng).bindPopup("📍 Localização atual").openPopup();
+  // URL do banco de dados Firebase para buscar os dados de rastreamento
+  const dbUrl = `https://sos-comunidade-a98de-default-rtdb.firebaseio.com/rastreamento/${id}.json`;
 
-        if (!lastLatLng) map.setView(latlng, 16);
-        else map.flyTo(latlng, 16, { animate: true, duration: 1.2 });
+  // Variáveis de controle do estado do mapa e rastreamento
+  let lastLatLng = null;
+  let ultimaHora = null;
+  const pontos = [];
+  let linha = null;
+  let marcadorInicio = null;
+  let marcadorFim = null;
+  let markerAdicionado = false;
 
-        lastLatLng = latlng;
-
-        if (ultima.timestamp && ultima.timestamp !== ultimaHora) {
-          ultimaHora = ultima.timestamp;
-          const hora = new Date(ultima.timestamp).toLocaleTimeString();
-          infoBox.innerText = `✅ Última atualização: ${hora}`;
-        }
-
-        pontos.length = 0;
-        entradas.forEach(([, pos]) => {
-          if (pos.latitude && pos.longitude) {
-            pontos.push([pos.latitude, pos.longitude]);
-          }
-        });
-
-        if (linha) map.removeLayer(linha);
-        linha = L.polyline(pontos, { color: '#007bff', weight: 4 }).addTo(map);
-
-        // ✅ marcador de início
-        if (meta.localInicio && !marcadorInicio) {
-          const inicioHora = meta.iniciadoEm ? new Date(meta.iniciadoEm).toLocaleTimeString() : '';
-          marcadorInicio = L.marker([meta.localInicio.latitude, meta.localInicio.longitude]).addTo(map)
-            .bindPopup(`🟢 Iniciado às ${inicioHora}`).openPopup();
-        }
-
-        // ✅ marcador de fim
-        if (meta.finalizadoEm && !marcadorFim) {
-          const fimHora = new Date(meta.finalizadoEm).toLocaleTimeString();
-          marcadorFim = L.marker(latlng).addTo(map)
-            .bindPopup(`🔴 Finalizado às ${fimHora}`).openPopup();
-        }
-
-        console.log(`🔵 Trajeto com ${pontos.length} pontos atualizado.`);
-      } catch (err) {
-        console.error("Erro ao buscar localização:", err);
-        infoBox.innerText = "⚠️ Erro ao buscar localização.";
+  // Função principal para buscar e atualizar os dados do rastreamento
+  async function atualizar() {
+    try {
+      // Busca os dados do rastreamento no Firebase
+      const res = await fetch(dbUrl);
+      const data = await res.json();
+      if (!data || typeof data !== 'object') {
+        infoBox.innerText = "🔄 Aguardando dados...";
+        return;
       }
-    }
 
-    centerBtn.onclick = () => {
-      if (lastLatLng) {
-        map.flyTo(lastLatLng, 16, { animate: true, duration: 1.2 });
+      // Separa os metadados e os pontos de localização
+      const meta = data.meta || {};
+      const entradas = Object.entries(data).filter(([k]) => k !== 'meta');
+      if (entradas.length === 0) {
+        infoBox.innerText = "🔄 Nenhum ponto encontrado.";
+        return;
       }
-    };
 
-    setInterval(atualizar, 5000);
-    atualizar();
-  </script>
+      // Ordena os pontos por timestamp (ordem cronológica)
+      entradas.sort((a, b) => a[1].timestamp - b[1].timestamp);
+      const ultima = entradas[entradas.length - 1][1];
+      const latlng = [ultima.latitude, ultima.longitude];
+
+      // Se o rastreamento foi finalizado, remove o marcador do usuário
+      if (meta.finalizadoEm) {
+        if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+          console.log("🛑 Rastreamento finalizado: ocultando marcador do usuário.");
+        }
+      } else {
+        // Adiciona ou atualiza o marcador do usuário
+        if (!markerAdicionado) {
+          marker.addTo(map).bindPopup("📍 Localização atual").openPopup();
+          markerAdicionado = true;
+          console.log("📍 Marcador de usuário adicionado.");
+        }
+        marker.setLatLng(latlng);
+      }
+
+      // Centraliza o mapa na primeira atualização ou faz animação nas próximas
+      if (!lastLatLng) map.setView(latlng, 16);
+      else map.flyTo(latlng, 16, { animate: true, duration: 1.2 });
+
+      lastLatLng = latlng;
+
+      // Atualiza a caixa de informações com o horário da última atualização
+      if (ultima.timestamp && ultima.timestamp !== ultimaHora) {
+        ultimaHora = ultima.timestamp;
+        const hora = new Date(ultima.timestamp).toLocaleTimeString();
+        infoBox.innerText = `✅ Última atualização: ${hora}`;
+      }
+
+      // Monta o array de pontos para desenhar a linha do trajeto
+      pontos.length = 0;
+      entradas.forEach(([, pos]) => {
+        if (pos.latitude && pos.longitude) {
+          pontos.push([pos.latitude, pos.longitude]);
+        }
+      });
+
+      // Remove a linha anterior e desenha a nova linha do trajeto
+      if (linha) map.removeLayer(linha);
+      linha = L.polyline(pontos, { color: '#007bff', weight: 4 }).addTo(map);
+
+      // Adiciona marcador de início se existir e ainda não foi adicionado
+      if (meta.localInicio && !marcadorInicio) {
+        const inicioHora = meta.iniciadoEm ? new Date(meta.iniciadoEm).toLocaleTimeString() : '';
+        marcadorInicio = L.marker(
+          [meta.localInicio.latitude, meta.localInicio.longitude],
+          { icon: currentStartIcon }
+        ).addTo(map).bindPopup(`🟢 Iniciado às ${inicioHora}`);
+        console.log("🟢 Marcador de início adicionado.");
+      }
+
+      // Adiciona marcador de fim se finalizado e ainda não foi adicionado
+      if (meta.finalizadoEm && !marcadorFim) {
+        const fimHora = new Date(meta.finalizadoEm).toLocaleTimeString();
+        marcadorFim = L.marker(latlng, { icon: currentEndIcon }).addTo(map).bindPopup(`🔴 Finalizado às ${fimHora}`);
+        console.log("🔴 Marcador de fim adicionado.");
+      }
+
+      console.log(`🔵 Trajeto com ${pontos.length} pontos atualizado.`);
+    } catch (err) {
+      console.error("Erro ao buscar localização:", err);
+      infoBox.innerText = "⚠️ Erro ao buscar localização.";
+    }
+  }
+
+  // Centraliza o mapa na última posição ao clicar no botão
+  centerBtn.onclick = () => {
+    if (lastLatLng) {
+      map.flyTo(lastLatLng, 16, { animate: true, duration: 1.2 });
+    }
+  };
+
+  // Atualiza a localização a cada 15 segundos
+  setInterval(atualizar, 15000);
+  atualizar();
+</script>
+  <!-- Fim do script de rastreamento -->
 </body>
 </html>

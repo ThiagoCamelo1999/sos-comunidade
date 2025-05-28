@@ -15,9 +15,9 @@ import Constants from 'expo-constants';
 // Chave de acesso para o serviço de rotas
 const ORS_API_KEY = Constants.expoConfig.extra.orsApiKey;
 
-
 // Dados de exemplo com locais de emergência
 const locaisFakes = {
+  // Cada chave representa um tipo de serviço de emergência
   policia: [
     { nome: 'Polícia Militar Jordão', telefone: '190', coords: { lat: -8.136382818902055, lon: -34.9368618530304 } },
     { nome: 'Delegacia Jardim Jordão', telefone: '190', coords: { lat: -8.139865903087069, lon: -34.93177269342763 } },
@@ -44,37 +44,39 @@ const locaisFakes = {
 
 // Componente principal da tela de emergência
 export default function EmergenciaScreen({ route, navigation }) {
+  // Recebe o tipo de emergência da navegação
   const { tipo } = route.params;
+  // Contexto do tema (claro/escuro)
   const { darkMode, isAuto } = useContext(ThemeContext);
 
-  // Estados para guardar localização, destino e rota
-  const [loc, setLoc] = useState(null);
-  let debounceTimeout = null;
+  // Estados para localização, destino, rota, carregamento, etc.
+  const [loc, setLoc] = useState(null); // Localização do usuário
+  let debounceTimeout = null; // Controle para evitar múltiplos cliques rápidos
 
+  // Função para traçar rota até um local
   const handleTraçarRota = (coords, nome) => {
     if (debounceTimeout) return; // Ignora se já está esperando
 
-    setLoadingDestino(nome);
-    setRotaCoords([]);
-    setInfoRota(null);
-    setDestino(null);
+    setLoadingDestino(nome); // Mostra loading no botão
+    setRotaCoords([]); // Limpa rota anterior
+    setInfoRota(null); // Limpa info anterior
+    setDestino(null); // Limpa destino anterior
 
     debounceTimeout = setTimeout(() => {
-      setDestino(coords);
+      setDestino(coords); // Define novo destino
       debounceTimeout = null;
-    }, 2000); // 300ms de espera para evitar cliques rápidos demais
+    }, 2000); // Espera 2 segundos para evitar cliques rápidos
   };
 
+  const [rotaCoords, setRotaCoords] = useState([]); // Coordenadas da rota
+  const [infoRota, setInfoRota] = useState(null); // Informações da rota (distância, tempo)
+  const [loading, setLoading] = useState(false); // Estado de carregamento geral
+  const [destino, setDestino] = useState(null); // Destino selecionado
+  const [loadingDestino, setLoadingDestino] = useState(null); // Loading do botão de rota
+  const pontos = locaisFakes[tipo] || []; // Lista de pontos do tipo selecionado
+  const [watcher, setWatcher] = useState(null); // Não utilizado aqui
 
-  const [rotaCoords, setRotaCoords] = useState([]);
-  const [infoRota, setInfoRota] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [destino, setDestino] = useState(null); // estava faltando também!
-  const [loadingDestino, setLoadingDestino] = useState(null);
-  const pontos = locaisFakes[tipo] || [];
-  const [watcher, setWatcher] = useState(null);
-
-  // Pede permissão e pega a localização do usuário
+  // Pede permissão e pega a localização do usuário ao abrir a tela
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -87,7 +89,7 @@ export default function EmergenciaScreen({ route, navigation }) {
         const { coords } = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced
         });
-        setLoc(coords);
+        setLoc(coords); // Salva localização
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível obter a localização.');
       } finally {
@@ -96,14 +98,14 @@ export default function EmergenciaScreen({ route, navigation }) {
     })();
   }, []);
 
-  // Toda vez que a localização ou destino mudarem, busca a nova rota
+  // Busca nova rota sempre que localização ou destino mudam
   useEffect(() => {
     if (loc && destino) {
       buscarRota().finally(() => setLoadingDestino(null));
     }
   }, [loc, destino]);
 
-  // Função para buscar o caminho entre o usuário e o destino
+  // Função para buscar rota entre usuário e destino usando OpenRouteService
   async function buscarRota() {
     if (!loc || !destino) return;
 
@@ -117,9 +119,11 @@ export default function EmergenciaScreen({ route, navigation }) {
         throw new Error('Nenhuma rota encontrada.');
       }
 
+      // Extrai coordenadas da rota
       const coords = json.features[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
       setRotaCoords(coords);
 
+      // Extrai distância e duração
       const distanciaKm = (json.features[0].properties.summary.distance / 1000).toFixed(2);
       const duracaoMin = Math.round(json.features[0].properties.summary.duration / 60);
       setInfoRota({ distanciaKm, duracaoMin });
@@ -132,7 +136,7 @@ export default function EmergenciaScreen({ route, navigation }) {
     }
   }
 
-  // Função para abrir o Google Maps com a rota
+  // Função para abrir rota no Google Maps
   function abrirGoogleMaps(dest) {
     if (!dest) return;
     Alert.alert(
@@ -151,9 +155,9 @@ export default function EmergenciaScreen({ route, navigation }) {
     );
   }
 
-  // Função para iniciar o rastreamento em segundo plano
+  // Função para iniciar rastreamento em tempo real (botão de pânico)
   function iniciarRastreamento() {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // vibração leve antes do alerta
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // Vibração leve
 
     Alert.alert(
       '🚨 Rastrear em tempo real',
@@ -164,16 +168,18 @@ export default function EmergenciaScreen({ route, navigation }) {
           text: 'Iniciar',
           onPress: async () => {
             try {
-              const rastreioId = uuid.v4();
+              const rastreioId = uuid.v4(); // Gera ID único
               console.log('🔁 Iniciando rastreamento com ID:', rastreioId);
-              await startBackgroundTracking(rastreioId);
+              await startBackgroundTracking(rastreioId); // Inicia rastreamento
 
+              // Gera link para compartilhar
               const link = `https://sos-comunidade-a98de.web.app/rastreamento.html?id=${rastreioId}`;
               const msg = `🚨 SOS! Me acompanhe em tempo real: ${link}`;
 
               await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              Linking.openURL(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+              Linking.openURL(`https://wa.me/?text=${encodeURIComponent(msg)}`); // Abre WhatsApp
 
+              // Para rastreamento após 1 hora
               setTimeout(async () => {
                 await stopBackgroundTracking();
                 Alert.alert('Rastreamento encerrado', 'Acompanhar ao vivo finalizado.');
@@ -189,12 +195,12 @@ export default function EmergenciaScreen({ route, navigation }) {
     );
   }
 
-
-  // Função para gerar o HTML do mapa
+  // Função que gera o HTML do mapa (usado no WebView)
   function gerarHTMLMapa() {
+    // Centraliza no usuário ou no primeiro ponto
     const center = loc ? `${loc.latitude},${loc.longitude}` : `${pontos[0]?.coords.lat || 0},${pontos[0]?.coords.lon || 0}`;
-    // para o vermelho
 
+    // Gera marcadores dos pontos de emergência
     const marcadores = pontos.map(p => `
     L.marker([${p.coords.lat},${p.coords.lon}], {
       icon: L.icon({
@@ -206,6 +212,7 @@ export default function EmergenciaScreen({ route, navigation }) {
     }).addTo(map).bindPopup('${p.nome}');
   `).join('\n');
 
+    // Marcador do usuário
     const marcadorUsuario = loc ? `
     var userIcon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -217,10 +224,12 @@ export default function EmergenciaScreen({ route, navigation }) {
     userMarker.bindPopup("Você está aqui").openPopup();
   ` : '';
 
+    // Linha da rota traçada
     const linhaReal = rotaCoords.length > 0
       ? `L.polyline(${JSON.stringify(rotaCoords)}, { color: '#4dabf7', weight: 4 }).addTo(map);`
       : '';
 
+    // Botão para centralizar no usuário
     const botaoCentralizar = loc ? `
     var centralizarBtn = L.control({position: 'topleft'});
     centralizarBtn.onAdd = function(map) {
@@ -236,6 +245,7 @@ export default function EmergenciaScreen({ route, navigation }) {
     centralizarBtn.addTo(map);
   ` : '';
 
+    // Ajusta o zoom para mostrar usuário e destino
     const fitBoundsCode = (loc && destino) ? `
     var bounds = L.latLngBounds([
       [${loc.latitude}, ${loc.longitude}],
@@ -244,14 +254,13 @@ export default function EmergenciaScreen({ route, navigation }) {
     map.fitBounds(bounds, { padding: [50, 50] });
   ` : '';
 
+    // HTML do mapa
     return `
     <html><head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
       <style> 
         html, body, #map { height: 100%; margin: 0; padding: 0; }
-        
-
         .centralizar-btn { 
           background: ${darkMode ? '#3a3a3c' : 'white'}; 
           border-radius: 8px; 
@@ -267,62 +276,56 @@ export default function EmergenciaScreen({ route, navigation }) {
       <div id="map"></div>
       <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
       <script>
+        // Camadas de mapas base
         var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: "&copy; OpenStreetMap contributors"
-});
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors"
+        });
 
-var cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-  attribution: '&copy; <a href="https://carto.com/">Carto</a>',
-  subdomains: 'abcd',
-  maxZoom: 19
-});
+        var cartoLight = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+        });
 
-var cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-  attribution: '&copy; <a href="https://carto.com/">Carto</a>',
-  subdomains: 'abcd',
-  maxZoom: 19
-});
+        var cartoDark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+        });
 
-var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-  attribution: 'Tiles © Esri'
-});
+        var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+          attribution: 'Tiles © Esri'
+        });
 
+        // Inicializa o mapa
+        var map = L.map('map', {
+          center: [${center}],
+          zoom: 13,
+          layers: [${darkMode ? 'cartoDark' : 'cartoLight'}]
+        });
 
-var map = L.map('map', {
-  center: [${center}],
-  zoom: 13,
-  layers: [${darkMode ? 'cartoDark' : 'cartoLight'}]
-});
+        // Controle de camadas
+        var baseMaps = {
+          "🌍 OpenStreetMap": osm,
+          "🧊 Claro (Carto Light)": cartoLight,
+          "🌙 Escuro (Carto Dark)": cartoDark,
+          "🛰️ Satélite (Esri)": satellite
+        };
 
-var baseMaps = {
-  "🌍 OpenStreetMap": osm,
-  "🧊 Claro (Carto Light)": cartoLight,
-  "🌙 Escuro (Carto Dark)": cartoDark,
-  "🛰️ Satélite (Esri)": satellite
-};
+        L.control.layers(baseMaps).addTo(map);
 
-L.control.layers(baseMaps).addTo(map);
-
-// Aplica filtro apenas quando a camada escura estiver ativa
-function atualizarFiltro() {
-  const tilePane = document.querySelector('.leaflet-tile-pane');
-  if (!tilePane) return;
-
-  // Verifica se a camada ativa é a do estilo escuro
-  const isDark = Object.values(map._layers).some(layer =>
-    layer._url && layer._url.includes('dark_all')
-  );
-
-  tilePane.style.filter = isDark ? 'brightness(4) contrast(1)' : 'none';
-}
-
-// Executa ao iniciar
-atualizarFiltro();
-
-// Reexecuta sempre que o usuário trocar a camada
-map.on('baselayerchange', atualizarFiltro);
-
+        // Aplica filtro visual se camada escura ativa
+        function atualizarFiltro() {
+          const tilePane = document.querySelector('.leaflet-tile-pane');
+          if (!tilePane) return;
+          const isDark = Object.values(map._layers).some(layer =>
+            layer._url && layer._url.includes('dark_all')
+          );
+          tilePane.style.filter = isDark ? 'brightness(4) contrast(1)' : 'none';
+        }
+        atualizarFiltro();
+        map.on('baselayerchange', atualizarFiltro);
 
         ${marcadores}
         ${marcadorUsuario}
@@ -334,9 +337,10 @@ map.on('baselayerchange', atualizarFiltro);
   `;
   }
 
-
+  // Renderização do componente
   return (
     <View style={[styles.container, { backgroundColor: darkMode ? '#2d2d30' : '#fff' }]}>
+      {/* Mapa */}
       <View style={styles.mapaContainer}>
         <WebView
           originWhitelist={['*']}
@@ -346,12 +350,14 @@ map.on('baselayerchange', atualizarFiltro);
         />
       </View>
 
+      {/* Informações da rota */}
       {infoRota && (
         <Text style={[styles.infoRota, { color: darkMode ? '#fff' : '#000' }]}>
           Distância: {infoRota.distanciaKm} km · Tempo: {infoRota.duracaoMin} min
         </Text>
       )}
 
+      {/* Lista de locais de emergência */}
       <FlatList
         data={pontos}
         keyExtractor={item => item.nome}
@@ -361,6 +367,7 @@ map.on('baselayerchange', atualizarFiltro);
             <Text style={[styles.nome, { color: darkMode ? '#e9ecef' : '#212529' }]}>{item.nome}</Text>
             <Text style={[styles.tel, { color: darkMode ? '#adb5bd' : '#495057' }]}>📞 {item.telefone}</Text>
             <View style={styles.actions}>
+              {/* Botão para traçar rota */}
               <TouchableOpacity
                 style={[styles.button, styles.buttonRoute, loadingDestino === item.nome && { opacity: 0.7 }]}
                 onPress={() => handleTraçarRota(item.coords, item.nome)}
@@ -372,10 +379,11 @@ map.on('baselayerchange', atualizarFiltro);
                   <Text style={styles.linkWhite}>🗺️ Traçar rota</Text>
                 )}
               </TouchableOpacity>
-
+              {/* Botão para abrir no Maps */}
               <TouchableOpacity style={[styles.button, styles.buttonMap]} onPress={() => abrirGoogleMaps(item.coords)} disabled={loadingDestino !== null}>
                 <Text style={styles.linkWhite}>📍 Maps</Text>
               </TouchableOpacity>
+              {/* Botão para ligar */}
               <TouchableOpacity style={[styles.button, styles.buttonCall]} onPress={() => Linking.openURL(`tel:${item.telefone}`)} disabled={loadingDestino !== null}>
                 <Text style={styles.linkWhite}>📞 Ligar</Text>
               </TouchableOpacity>
@@ -403,99 +411,117 @@ map.on('baselayerchange', atualizarFiltro);
   );
 }
 
+// Estilos da tela
+// Estilos da tela de emergência
 const styles = StyleSheet.create({
+  // Container principal da tela
   container: {
-    flex: 1,
+    flex: 1, // Ocupa toda a tela
   },
+  // Container do mapa (WebView)
   mapaContainer: {
-    height: Dimensions.get('window').height * 0.4,
+    height: Dimensions.get('window').height * 0.4, // Altura do mapa (40% da tela)
   },
+  // Texto de informações da rota (distância/tempo)
   infoRota: {
-    textAlign: 'center',
-    marginVertical: 8,
+    textAlign: 'center', // Centraliza texto
+    marginVertical: 8, // Espaço vertical
     fontWeight: 'bold',
-    paddingHorizontal: 16,
+    paddingHorizontal: 16, // Espaço lateral
   },
+  // Estilo da lista de locais de emergência
   list: {
-    paddingHorizontal: 12,
-    paddingBottom: 20,
+    paddingHorizontal: 12, // Espaço lateral da lista
+    paddingBottom: 20, // Espaço inferior
   },
+  // Card de cada local de emergência
   card: {
-    marginVertical: 6,
-    padding: 12,
-    borderRadius: 8,
-    elevation: 1,
+    marginVertical: 6, // Espaço entre cards
+    padding: 12, // Espaço interno
+    borderRadius: 8, // Bordas arredondadas
+    elevation: 1, // Sombra Android
   },
+  // Nome do local (título do card)
   nome: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-    fontSize: 16,
+    fontWeight: 'bold', // Nome em negrito
+    marginBottom: 4, // Espaço abaixo do nome
+    fontSize: 16, // Tamanho da fonte do nome
   },
+  // Telefone do local
   tel: {
-    marginBottom: 6,
-    fontSize: 14,
+    marginBottom: 6, // Espaço abaixo do telefone
+    fontSize: 14, // Tamanho da fonte do telefone
   },
+  // Container dos botões de ação do card
   actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    gap: 8,
+    flexDirection: 'row', // Botões lado a lado
+    justifyContent: 'space-between', // Espaço entre botões
+    marginTop: 8, // Espaço acima dos botões
+    gap: 8, // Espaço entre botões (RN >= 0.71)
   },
+  // Estilo base dos botões de ação
   button: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    minWidth: 90,
-    alignItems: 'center',
+    paddingVertical: 6, // Espaço vertical do botão
+    paddingHorizontal: 10, // Espaço horizontal do botão
+    borderRadius: 4, // Bordas arredondadas do botão
+    minWidth: 90, // Largura mínima do botão
+    alignItems: 'center', // Centraliza texto do botão
   },
+  // Botão de traçar rota
   buttonRoute: {
-    backgroundColor: '#e63946',
+    backgroundColor: '#e63946', // Cor do botão de rota
   },
+  // Botão de ligar
   buttonCall: {
-    backgroundColor: '#4dabf7',
+    backgroundColor: '#4dabf7', // Cor do botão de ligar
   },
+  // Botão de abrir no Maps
   buttonMap: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#6c757d', // Cor do botão de maps
   },
+  // Texto branco dos botões
   linkWhite: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: '#fff', // Texto branco
+    fontWeight: 'bold', // Texto em negrito
+    fontSize: 14, // Tamanho da fonte do texto do botão
   },
+  // Botão de pânico (rastrear em tempo real)
   buttonPanico: {
-    margin: 16,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    margin: 16, // Espaço externo do botão de pânico
+    paddingVertical: 14, // Espaço vertical interno
+    borderRadius: 8, // Bordas arredondadas
+    alignItems: 'center', // Centraliza texto
+    shadowColor: '#000', // Cor da sombra
+    shadowOpacity: 0.2, // Opacidade da sombra
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento da sombra
+    shadowRadius: 4, // Raio da sombra
   },
+  // Texto do botão de pânico
   buttonPanicoText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: '#fff', // Texto branco
+    fontWeight: 'bold', // Texto em negrito
+    fontSize: 16, // Tamanho da fonte
   },
+  // Botão de voltar para a tela inicial
   buttonVoltar: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: 8,
-    marginBottom: 20,
-    elevation: 2, // sombra Android
-    shadowColor: '#000', // sombra iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    paddingVertical: 14, // Espaço vertical interno
+    paddingHorizontal: 24, // Espaço horizontal interno
+    borderRadius: 8, // Bordas arredondadas
+    alignItems: 'center', // Centraliza texto
+    justifyContent: 'center', // Centraliza conteúdo
+    alignSelf: 'center', // Centraliza botão na tela
+    marginTop: 8, // Espaço acima do botão
+    marginBottom: 20, // Espaço abaixo do botão
+    elevation: 2, // Sombra Android
+    shadowColor: '#000', // Sombra iOS
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento da sombra
+    shadowOpacity: 0.2, // Opacidade da sombra
+    shadowRadius: 4, // Raio da sombra
   },
+  // Texto do botão de voltar
   buttonVoltarText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#ffffff', // Texto branco
+    fontSize: 16, // Tamanho da fonte
+    fontWeight: '600', // Peso da fonte
   },
-
 });
