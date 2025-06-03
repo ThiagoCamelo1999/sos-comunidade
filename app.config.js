@@ -6,7 +6,7 @@ export default {
     name: "SOS Comunidade",
     slug: "sos-comunidade-v2",
     owner: "thiago.camelo1999",
-    version: "12.5.5",
+    version: "13.2.1",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",

@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "ORS_API_KEY": "coloque_aqui_sua_chave_ors",
+       "ORS_API_KEY": "coloque_aqui_sua_chave_ors",
         "FIREBASE_API_KEY": "coloque_aqui_sua_chave_firebase",
         "FIREBASE_AUTH_DOMAIN": "coloque_aqui_seu_auth_domain",
         "FIREBASE_DB_URL": "coloque_aqui_sua_url_do_banco",

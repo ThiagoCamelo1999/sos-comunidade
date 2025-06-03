@@ -1,80 +1,55 @@
 // Importação de bibliotecas que vamos usar
 import React, { useEffect, useState, useContext } from 'react';
-import { Asset } from 'expo-asset';
 import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity, Linking, Alert, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 import { ThemeContext } from '../context/ThemeContext';
 import * as Haptics from 'expo-haptics';
-import { database } from '../context/firebase'; // ou o caminho certo no seu projeto
-import { push, ref, set } from 'firebase/database';
 import uuid from 'react-native-uuid';
 import { startBackgroundTracking, stopBackgroundTracking } from '../context/locationTask';
 import Constants from 'expo-constants';
+import locaisFakes from '../data/locaisFakes'; // Importa os dados de locais de emergência
 
 // Chave de acesso para o serviço de rotas
 const ORS_API_KEY = Constants.expoConfig.extra.orsApiKey;
 
-// Dados de exemplo com locais de emergência
-const locaisFakes = {
-  // Cada chave representa um tipo de serviço de emergência
-  policia: [
-    { nome: 'Polícia Militar Jordão', telefone: '190', coords: { lat: -8.136382818902055, lon: -34.9368618530304 } },
-    { nome: 'Delegacia Jardim Jordão', telefone: '190', coords: { lat: -8.139865903087069, lon: -34.93177269342763 } },
-  ],
-  bombeiros: [
-    { nome: 'Corpo de Bombeiros', telefone: '193', coords: { lat: -8.164071996922287, lon: -34.922720115587936 } },
-    { nome: 'CBM Bombeiros Militar', telefone: '193', coords: { lat: -8.050742290095572, lon: -34.89125356146615 } },
-  ],
-  hospitais: [
-    { nome: 'Hospital Otávio de Freitas', telefone: '(81) 3182-8500', coords: { lat: -8.08588628783825, lon: -34.96234114070481 } },
-    { nome: 'Hospital Areias', telefone: '(81) 3182-3000', coords: { lat: -8.100129945192489, lon: -34.926403746465134 } },
-  ],
-  upas: [
-    { nome: 'UPA - Tipo III Lagoa Encantada', telefone: '(81) 3184-4595', coords: { lat: -8.12866692590721, lon: -34.9495069969486 } },
-    { nome: 'UPAE Dois Rios', telefone: '(81) 3788-3888', coords: { lat: -8.109822044415735, lon: -34.936491318057705 } },
-    { nome: 'UPA Imbiribeira', telefone: '(81) 3184-4328', coords: { lat: -8.120891590987684, lon: -34.91386177605739 } },
-    { nome: 'UPAE-R Ipsep', telefone: '(81) 3788-3899', coords: { lat: -8.10050097842462, lon: -34.92554985444436 } },
-  ],
-  samu: [
-    { nome: 'SAMU Ibura', telefone: '192', coords: { lat: -8.120201418927774, lon: -34.94444233872937 } },
-    { nome: 'SAMU Piedade', telefone: '192', coords: { lat: -8.162931568756852, lon: -34.915201384780055 } },
-  ],
-};
+
+// Função para calcular a distância entre dois pontos geográficos
+function calcularDistancia(loc1, loc2) {
+  const R = 6371e3;
+  const φ1 = loc1.latitude * Math.PI / 180;
+  const φ2 = loc2.lat * Math.PI / 180;
+  const Δφ = (loc2.lat - loc1.latitude) * Math.PI / 180;
+  const Δλ = (loc2.lon - loc1.longitude) * Math.PI / 180;
+  const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 // Componente principal da tela de emergência
 export default function EmergenciaScreen({ route, navigation }) {
   // Recebe o tipo de emergência da navegação
   const { tipo } = route.params;
+  console.log('🧭 Tipo recebido na tela:', tipo);
+  console.log("📦 Dados recebidos:", locaisFakes[tipo]);
+
   // Contexto do tema (claro/escuro)
   const { darkMode, isAuto } = useContext(ThemeContext);
+
+
 
   // Estados para localização, destino, rota, carregamento, etc.
   const [loc, setLoc] = useState(null); // Localização do usuário
   let debounceTimeout = null; // Controle para evitar múltiplos cliques rápidos
 
-  // Função para traçar rota até um local
-  const handleTraçarRota = (coords, nome) => {
-    if (debounceTimeout) return; // Ignora se já está esperando
-
-    setLoadingDestino(nome); // Mostra loading no botão
-    setRotaCoords([]); // Limpa rota anterior
-    setInfoRota(null); // Limpa info anterior
-    setDestino(null); // Limpa destino anterior
-
-    debounceTimeout = setTimeout(() => {
-      setDestino(coords); // Define novo destino
-      debounceTimeout = null;
-    }, 2000); // Espera 2 segundos para evitar cliques rápidos
-  };
 
   const [rotaCoords, setRotaCoords] = useState([]); // Coordenadas da rota
   const [infoRota, setInfoRota] = useState(null); // Informações da rota (distância, tempo)
   const [loading, setLoading] = useState(false); // Estado de carregamento geral
   const [destino, setDestino] = useState(null); // Destino selecionado
   const [loadingDestino, setLoadingDestino] = useState(null); // Loading do botão de rota
-  const pontos = locaisFakes[tipo] || []; // Lista de pontos do tipo selecionado
-  const [watcher, setWatcher] = useState(null); // Não utilizado aqui
+  const [pontos, setPontos] = useState([]);
+  const [pontosOrdenados, setPontosOrdenados] = useState([]); // Pontos ordenados por distância
 
   // Pede permissão e pega a localização do usuário ao abrir a tela
   useEffect(() => {
@@ -90,6 +65,15 @@ export default function EmergenciaScreen({ route, navigation }) {
           accuracy: Location.Accuracy.Balanced
         });
         setLoc(coords); // Salva localização
+        const dados = locaisFakes[tipo] || [];
+        setPontos(dados); // Agora é estado global
+
+        const pontosComDist = dados.map(p => ({
+          ...p,
+          distancia: calcularDistancia(coords, p.coords)
+        })).sort((a, b) => a.distancia - b.distancia);
+
+        setPontosOrdenados(pontosComDist);
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível obter a localização.');
       } finally {
@@ -121,6 +105,8 @@ export default function EmergenciaScreen({ route, navigation }) {
 
       // Extrai coordenadas da rota
       const coords = json.features[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      // Atualiza estado com as coordenadas da rota
+      const props = json.features[0].properties.summary;
       setRotaCoords(coords);
 
       // Extrai distância e duração
@@ -135,6 +121,22 @@ export default function EmergenciaScreen({ route, navigation }) {
       setLoadingDestino(null);
     }
   }
+
+  // Função para traçar rota até um local
+  const handleTraçarRota = (coords, nome) => {
+    if (debounceTimeout) return; // Ignora se já está esperando
+
+    setLoadingDestino(nome); // Mostra loading no botão
+    setRotaCoords([]); // Limpa rota anterior
+    setInfoRota(null); // Limpa info anterior
+    setDestino(null); // Limpa destino anterior
+
+    debounceTimeout = setTimeout(() => {
+      setDestino(coords); // Define novo destino
+      debounceTimeout = null;
+    }, 2000); // Espera 2 segundos para evitar cliques rápidos
+  };
+
 
   // Função para abrir rota no Google Maps
   function abrirGoogleMaps(dest) {
@@ -198,10 +200,14 @@ export default function EmergenciaScreen({ route, navigation }) {
   // Função que gera o HTML do mapa (usado no WebView)
   function gerarHTMLMapa() {
     // Centraliza no usuário ou no primeiro ponto
-    const center = loc ? `${loc.latitude},${loc.longitude}` : `${pontos[0]?.coords.lat || 0},${pontos[0]?.coords.lon || 0}`;
+    const center = loc
+      ? `${loc.latitude},${loc.longitude}`
+      : (Array.isArray(pontos) && pontos.length > 0
+        ? `${pontos[0].coords.lat},${pontos[0].coords.lon}`
+        : `0,0`);
 
     // Gera marcadores dos pontos de emergência
-    const marcadores = pontos.map(p => `
+    const marcadores = Array.isArray(pontos) ? pontos.map(p => `
     L.marker([${p.coords.lat},${p.coords.lon}], {
       icon: L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -210,7 +216,7 @@ export default function EmergenciaScreen({ route, navigation }) {
         popupAnchor: [0, -30]
       })
     }).addTo(map).bindPopup('${p.nome}');
-  `).join('\n');
+  `).join('\n'): '';
 
     // Marcador do usuário
     const marcadorUsuario = loc ? `
@@ -359,12 +365,16 @@ export default function EmergenciaScreen({ route, navigation }) {
 
       {/* Lista de locais de emergência */}
       <FlatList
-        data={pontos}
+        data={pontosOrdenados}
         keyExtractor={item => item.nome}
+        ListHeaderComponent={() => infoRota && (
+          <Text style={[styles.infoRota, { color: darkMode ? '#fff' : '#000' }]}>Distância: {infoRota.distanciaKm} km · Tempo: {infoRota.duracaoMin} min</Text>
+        )}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: darkMode ? '#3a3a3c' : '#f8f9fa' }]}>
-            <Text style={[styles.nome, { color: darkMode ? '#e9ecef' : '#212529' }]}>{item.nome}</Text>
+            <Text style={[styles.nome, { color: darkMode ? '#e9ecef' : '#212529' }]}>{item.nome} - {(item.distancia / 1000).toFixed(2)} km (aprox.)</Text>
+            <Text style={[styles.endereco, { color: darkMode ? '#ced4da' : '#6c757d' }]}>📍 {item.endereco || 'Endereço não informado'}</Text>
             <Text style={[styles.tel, { color: darkMode ? '#adb5bd' : '#495057' }]}>📞 {item.telefone}</Text>
             <View style={styles.actions}>
               {/* Botão para traçar rota */}
@@ -446,6 +456,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', // Nome em negrito
     marginBottom: 4, // Espaço abaixo do nome
     fontSize: 16, // Tamanho da fonte do nome
+  },
+  // Endereço do local
+  endereco: {
+    marginBottom: 4, // Espaço abaixo do endereço
+    fontSize: 14, // Tamanho da fonte do endereço
+    fontStyle: 'italic', // Endereço em itálico
   },
   // Telefone do local
   tel: {

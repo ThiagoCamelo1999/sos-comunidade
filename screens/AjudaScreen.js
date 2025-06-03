@@ -100,66 +100,80 @@ export default function AjudaScreen({ navigation }) {
 
 // Estilos da tela usando StyleSheet do React Native
 const styles = StyleSheet.create({
+  // Container principal da tela
   container: {
     flex: 1, // Ocupa toda a tela
     padding: 24, // Espaçamento interno
     backgroundColor: 'transparent', // Cor de fundo definida pelo tema
   },
+  // Cabeçalho da tela (título)
   header: {
     marginBottom: 24, // Espaço abaixo do cabeçalho
     alignItems: 'center', // Centraliza o título
   },
+  // Estilo do texto do título
   title: {
     fontSize: 26, // Tamanho da fonte do título
     fontWeight: 'bold', // Negrito
     textAlign: 'center', // Centraliza o texto
   },
+  // Área de conteúdo principal
   content: {
-    flex: 1, // Ocupa o espaço restante
+    flex: 1, // Ocupa o espaço restante da tela
   },
+  // Seção de agrupamento (ex: instruções, contato)
   section: {
     marginBottom: 24, // Espaço entre seções
   },
+  // Estilo do subtítulo das seções
   subtitle: {
     fontSize: 18, // Tamanho da fonte do subtítulo
     fontWeight: '600', // Seminegrito
     marginBottom: 12, // Espaço abaixo do subtítulo
   },
+  // Parágrafo de texto explicativo
   paragraph: {
     fontSize: 16, // Tamanho da fonte do parágrafo
     lineHeight: 24, // Altura da linha
     marginBottom: 24, // Espaço abaixo do parágrafo
     textAlign: 'justify', // Justifica o texto
   },
+  // Item da lista de instruções
   listItem: {
-    flexDirection: 'row', // Itens em linha
+    flexDirection: 'row', // Itens em linha (marcador + texto)
     alignItems: 'flex-start', // Alinha ao topo
     marginBottom: 8, // Espaço entre itens
     paddingLeft: 8, // Espaço à esquerda
   },
+  // Estilo do marcador (bullet) da lista
   bullet: {
     marginRight: 8, // Espaço após o marcador
     fontSize: 18, // Tamanho do marcador
     lineHeight: 22, // Altura da linha do marcador
   },
+  // Texto do item da lista
   listText: {
     fontSize: 16, // Tamanho do texto do item
     flex: 1, // Ocupa o espaço restante
   },
+  // Linha de contato (label + valor)
   contactItem: {
     flexDirection: 'row', // Linha para label e valor
     alignItems: 'center', // Centraliza verticalmente
     marginBottom: 8, // Espaço entre contatos
   },
+  // Estilo do label do contato (ex: "Email:")
   contactLabel: {
     width: 80, // Largura fixa para o label
     fontSize: 16,
     fontWeight: '500', // Seminegrito
   },
+  // Valor do contato (ex: email ou telefone)
   contactValue: {
     fontSize: 16,
     flex: 1, // Ocupa o espaço restante
   },
+  // Estilo do botão de voltar
   button: {
     paddingVertical: 14, // Espaço vertical interno
     paddingHorizontal: 32, // Espaço horizontal interno
@@ -175,6 +189,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4, // Raio da sombra
     minWidth: 200, // Largura mínima do botão
   },
+  // Estilo do texto do botão
   buttonText: {
     color: '#ffffff', // Cor do texto do botão
     fontSize: 16,
